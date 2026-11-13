@@ -1,8 +1,6 @@
 name: Build QualityBadge
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
 jobs:
   build:
     runs-on: macos-latest
@@ -14,6 +12,7 @@ jobs:
           xcrun --sdk iphoneos clang -arch arm64 -isysroot "$SDK" \
             -miphoneos-version-min=15.0 -fobjc-arc -Wall -dynamiclib \
             -framework UIKit -framework Foundation -framework Network \
+            -framework CoreGraphics -framework QuartzCore \
             -install_name @rpath/QualityBadge.dylib \
             -o QualityBadge.dylib QualityBadge.m
           codesign -f -s - QualityBadge.dylib
