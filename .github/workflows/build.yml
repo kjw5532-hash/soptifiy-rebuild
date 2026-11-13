@@ -1,0 +1,24 @@
+name: Build QualityBadge
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile dylib
+        run: |
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          xcrun --sdk iphoneos clang -arch arm64 -isysroot "$SDK" \
+            -miphoneos-version-min=15.0 -fobjc-arc -Wall -dynamiclib \
+            -framework UIKit -framework Foundation -framework Network \
+            -install_name @rpath/QualityBadge.dylib \
+            -o QualityBadge.dylib QualityBadge.m
+          codesign -f -s - QualityBadge.dylib
+          file QualityBadge.dylib
+      - uses: actions/upload-artifact@v4
+        with:
+          name: QualityBadge
+          path: QualityBadge.dylib
